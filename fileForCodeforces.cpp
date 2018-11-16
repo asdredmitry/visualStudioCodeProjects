@@ -1,121 +1,151 @@
 #include <iostream>
-#include <cmath>
 #include <vector>
-#include <string>
+#include <algorithm>
 #include <cmath>
-#include <stdlib.h>
-#include <cstdio>
 #include <limits.h>
-#include <utility>
 using namespace std;
-const int inf = INT_MAX;
-void dfs(vector<long long int> * graph, vector<pair<int, int> > & visit,  int * weights, int cur)
+int inf = INT_MAX/10;
+int log2Max = log2(inf);
+const int maxN = 200000; 
+vector<int> powers;
+vector<int> logArr;
+vector<int> visit;
+vector<int> weights;
+vector<int> first;
+//int ** sparseTable; 
+void dfs(vector<int> * graph, vector<bool> & used, int cur)
 {
-    visit.push_back(make_pair(weights[cur], cur));
-    bool hasChild = false;
+    visit.push_back(cur);
     for(int i = 0; i < graph[cur].size(); i++)
     {
-        hasChild = true;
-        weights[graph[cur][i]] = weights[cur] + 1;
-        dfs(graph, visit, weights, graph[cur][i]);
-        visit.push_back(make_pair(weights[cur], cur));
+        if(!used[graph[cur][i]])
+        {
+            used[graph[cur][i]] = true;
+            weights[graph[cur][i]] = weights[cur] + 1;
+            dfs(graph, used, graph[cur][i]);
+            visit.push_back(cur);
+        }
     }
-    if(!hasChild)
-        visit.push_back(make_pair(weights[cur], cur));
+}
+int lca(int a1, int a2, int ** sparseTable)
+{
+    //cout << a1 << " " << a2 << endl;
+    int l = first[a1];
+    int r = first[a2];
+    if(l > r)
+        swap(l, r);
+    cout  << r << " r and l " << l << endl;
+    cout << "Come here" << r - powers[logArr[r - l + 1] + 1] << " " << logArr[r - l + 1] << endl;
+    cout << sparseTable[0][1] << endl;
+    int vertex1 = sparseTable[l][logArr[ r - l + 1]];
+    cout << "Come and here" << endl;
+    int vertex2 = sparseTable[r - powers[logArr[r - l + 1]] + 1][logArr[r - l + 1]];
+    cout << " Finally here" << endl;
+    //cout << " and here" << endl;
+    return 1;
+    //return (weights[vertex1] > weights[vertex1] ? vertex1 : vertex1);
 }
 int main()
 {
-    int max = 100100;
-    long long int * log2Arr = new long long int[max];
-    for(int i = 1; i < max; i++)
-    {
-        log2Arr[i] = int(log2(i));
-    }
-    long long int * powers = new long long int[max];
+    ios :: sync_with_stdio(false);
+    //vector<int> powers(maxN*2);
+    //vector<int> logArr(maxN*2);
+    powers.resize(maxN*2);
+    logArr.resize(maxN*2);
     powers[0] = 1;
-    for(int i = 1; i < max; i++)
+    for(int i = 1; i < 2*maxN; i++)
     {
-        powers[i] = 2*powers[i - 1];
+        if(i < log2Max)
+            powers[i] = powers[i - 1]*2;
+        else
+            powers[i] = inf;
+        logArr[i] = int(log2(i));
     }
-    FILE * read = fopen("lca_rmq.in", "r");
-    FILE * write = fopen("lca_rmq.out", "w");
-    long long int n;
-    long long int m;
-    fscanf(read,"%lld",&n);
-    fscanf(read,"%lld",&m);
-    vector<long long int> * graph = new vector<long long int>[n];
+    int n;
+    cin >> n;
+    vector<int> * graph = new vector<int>[n];
+    int q;
+    cin >> q;
+    int tmp;
     for(int i = 0; i < n - 1; i++)
     {
-        long long int tmp;
-        fscanf(read, "%lld",&tmp);
+        cin >> tmp;
+        tmp--;
+        graph[i + 1].push_back(tmp);
         graph[tmp].push_back(i + 1);
     }
-    long long int  a1, a2;
-    fscanf(read, "%lld", &a1);
-    fscanf(read, "%lld", &a2);
-    long long int x, y, z;
-    fscanf(read,"%lld", &x);
-    fscanf(read,"%lld", &y);
-    fscanf(read,"%lld", &z);
-    int * weights = new int[n];
-    weights[0] = 0;
-    vector<pair<int, int> > visit;
-    dfs(graph, visit, weights, 0);
-    long long int prevAns = 0;
-    pair<int, int> ** sparseTable = new pair<int, int>* [visit.size()];
-    for(int i = 0 ; i< visit.size(); i++)
-        sparseTable[i] = new pair<int, int>[log2Arr[visit.size()]+ 1];
+    vector<bool> used(n);
+    cout << " i am here" << endl;
+    //vector<int> weights(n);
+    weights.resize(n);
+    fill(used.begin(), used.end(), false);
+    fill(weights.begin(), weights.end(), 0);
+    //vector<int> visit;
+    visit.reserve(2*n + 1);
+    used[0] = true;
+    cout << " and here " << endl;
+    dfs(graph, used, 0);
+    cout << " visit" <<  endl;
+    for(int i = 0; i < visit.size(); i++)
+        cout << visit[i] << " ";
+    cout << endl;
+    first.resize(n);
+    fill(first.begin(), first.end(), -1);
     for(int i = 0; i < visit.size(); i++)
     {
-        for(int j = 0; j < log2Arr[visit.size()] + 1; j++)
-            sparseTable[i][j].first = inf;
+        if(first[visit[i]] == -1)
+            first[visit[i]] = i; 
     }
-    for(int  i = visit.size() - 1; i >= 0; i--)
+    cout << " I come till here" << endl;
+    int ** sparseTable = new int *[visit.size()];
+    for(int i = 0; i < visit.size(); i++)
+        sparseTable[i] = new int [logArr[visit.size()] + 1];
+    cout << logArr[visit.size()] + 1 << " logArr " << endl;; 
+    for(int i = visit.size() - 1; i >= 0; i--)
     {
-        for(int j = 0; j < log2Arr[visit.size()] + 1; j++)
+        for(int j = 0; j < logArr[visit.size()] + 1; j++)
         {
             if(j == 0)
                 sparseTable[i][j] = visit[i];
             else
             {
-                pair<int ,int> tmp1 = sparseTable[i][j - 1];
-                pair<int ,int> tmp2 = (i + powers[j - 1] < visit.size())? sparseTable[i + powers[j - 1]][j - 1] : sparseTable[i][j - 1];
-                sparseTable[i][j] = (tmp1 > tmp2) ? tmp2 : tmp1;
+                int vertex1 = sparseTable[i][j - 1];
+                int vertex2 = (i + powers[j - 1] < visit.size()) ? sparseTable[i + powers[j - 1]][j-1] : sparseTable[i][j - 1];
+                sparseTable[i][j] = weights[vertex1] > weights[vertex2] ? vertex2 : vertex1;
             }
         }
     }
-    long long int answer = 0;
-    int * first = new int[n];
-    for(int i = 0; i < n; i++)
-        first[i] = -1;
-    for(int i = 0; i < visit.size(); i++)
+    cout << sparseTable[0][1] << " sparseTable 0 and 1" << endl;
+    cout << "first" << endl;
+    for(int i = 0; i < first.size(); i++)
+        cout << first[i] << " ";
+    cout << endl;
+    int a[3];
+    for(int i = 0; i < q; i++)
     {
-        if(first[visit[i].second] == -1)
-            first[visit[i].second] = i;
-    }
-    for(long long int i = 0; i < m; i++)
-    {
-        if(i != 0)
+        int globalMax = 0;
+        cin >> a[0] >> a[1] >> a[2];
+        a[0]--;
+        a[1]--;
+        a[2]--;
+        for(int j = 0; j < 3; j++)
         {
-            long long tmp1 = (x*a1 + y*a2 + z)%n;
-            long long tmp2 = (x*a2 + tmp1*y + z)%n;
-            a1 = tmp1;
-            a2 = tmp2; 
+            int curMax = 0;
+            int f = a[j];
+            int t = a[(j + 1)%3];
+            int s = a[(j + 2)%3];
+            cout << f << t << s << endl;
+            int lcaft = lca(f, t, sparseTable);
+            cout << "and here" << endl;
+            int lcafs = lca(f, s, sparseTable);
+            //int lcats = lca(t, s);
+            curMax = min(abs(weights[lcaft] - weights[f]), abs(weights[lcafs] - weights[f]));
+            globalMax = max(globalMax, curMax);
         }
-        long long int r1 = (a1 + prevAns)%n;
-        long long int r2 = a2;
-        long long int l = first[r1];
-        long long int r = first[r2];
-        if(l > r)
-            swap(l, r);
-        pair<int, int> tpq1 = sparseTable[l][log2Arr[r - l + 1]];
-        pair<int, int> tpq2 = sparseTable[r - powers[log2Arr[r - l + 1]] + 1][log2Arr[r - l + 1]];
-        pair<int, int> ans = (tpq1 > tpq2) ? tpq2 : tpq1;
-        prevAns = ans.second;
-        answer += ans.second;        
+        cout << globalMax << " globalMax ";
     }
-    fprintf(write, "%lld", answer);
-    fclose(read);
-    fclose(write);
+    cout << endl;
+
+
     return 0;
 }
