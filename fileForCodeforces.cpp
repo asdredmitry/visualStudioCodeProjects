@@ -11,8 +11,7 @@ vector<int> powers;
 vector<int> logArr;
 vector<int> visit;
 vector<int> weights;
-vector<int> first;
-//int ** sparseTable; 
+vector<int> first; 
 void dfs(vector<int> * graph, vector<bool> & used, int cur)
 {
     visit.push_back(cur);
@@ -29,27 +28,17 @@ void dfs(vector<int> * graph, vector<bool> & used, int cur)
 }
 int lca(int a1, int a2, int ** sparseTable)
 {
-    //cout << a1 << " " << a2 << endl;
     int l = first[a1];
     int r = first[a2];
     if(l > r)
         swap(l, r);
-    cout  << r << " r and l " << l << endl;
-    cout << "Come here" << r - powers[logArr[r - l + 1] + 1] << " " << logArr[r - l + 1] << endl;
-    cout << sparseTable[0][1] << endl;
     int vertex1 = sparseTable[l][logArr[ r - l + 1]];
-    cout << "Come and here" << endl;
     int vertex2 = sparseTable[r - powers[logArr[r - l + 1]] + 1][logArr[r - l + 1]];
-    cout << " Finally here" << endl;
-    //cout << " and here" << endl;
-    return 1;
-    //return (weights[vertex1] > weights[vertex1] ? vertex1 : vertex1);
+    return (weights[vertex1] > weights[vertex1] ? vertex1 : vertex1);
 }
 int main()
 {
     ios :: sync_with_stdio(false);
-    //vector<int> powers(maxN*2);
-    //vector<int> logArr(maxN*2);
     powers.resize(maxN*2);
     logArr.resize(maxN*2);
     powers[0] = 1;
@@ -75,20 +64,12 @@ int main()
         graph[tmp].push_back(i + 1);
     }
     vector<bool> used(n);
-    cout << " i am here" << endl;
-    //vector<int> weights(n);
     weights.resize(n);
     fill(used.begin(), used.end(), false);
     fill(weights.begin(), weights.end(), 0);
-    //vector<int> visit;
     visit.reserve(2*n + 1);
     used[0] = true;
-    cout << " and here " << endl;
     dfs(graph, used, 0);
-    cout << " visit" <<  endl;
-    for(int i = 0; i < visit.size(); i++)
-        cout << visit[i] << " ";
-    cout << endl;
     first.resize(n);
     fill(first.begin(), first.end(), -1);
     for(int i = 0; i < visit.size(); i++)
@@ -96,11 +77,9 @@ int main()
         if(first[visit[i]] == -1)
             first[visit[i]] = i; 
     }
-    cout << " I come till here" << endl;
     int ** sparseTable = new int *[visit.size()];
     for(int i = 0; i < visit.size(); i++)
         sparseTable[i] = new int [logArr[visit.size()] + 1];
-    cout << logArr[visit.size()] + 1 << " logArr " << endl;; 
     for(int i = visit.size() - 1; i >= 0; i--)
     {
         for(int j = 0; j < logArr[visit.size()] + 1; j++)
@@ -115,11 +94,6 @@ int main()
             }
         }
     }
-    cout << sparseTable[0][1] << " sparseTable 0 and 1" << endl;
-    cout << "first" << endl;
-    for(int i = 0; i < first.size(); i++)
-        cout << first[i] << " ";
-    cout << endl;
     int a[3];
     for(int i = 0; i < q; i++)
     {
@@ -134,12 +108,19 @@ int main()
             int f = a[j];
             int t = a[(j + 1)%3];
             int s = a[(j + 2)%3];
-            cout << f << t << s << endl;
+            cout << f << " " << t << " " << s << endl;
             int lcaft = lca(f, t, sparseTable);
-            cout << "and here" << endl;
             int lcafs = lca(f, s, sparseTable);
-            //int lcats = lca(t, s);
-            curMax = min(abs(weights[lcaft] - weights[f]), abs(weights[lcafs] - weights[f]));
+            int lcats = lca(t, s, sparseTable);
+            cout << lcaft << " " << lcafs << " " << lcats << endl;
+            if(lcaft == f && lcafs == f)
+            {
+                //cout << "I am here " << endl;
+                //cout << f << t << s << endl;
+                curMax = abs(weights[f] - weights[lcats]);
+            }
+            else 
+                curMax = min(abs(weights[lcaft] - weights[f]), abs(weights[lcafs] - weights[f]));
             globalMax = max(globalMax, curMax);
         }
         cout << globalMax << " globalMax ";
