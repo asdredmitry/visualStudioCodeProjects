@@ -1,12 +1,22 @@
 #include <iostream>
-#include <map>
+#include <vector>
+#include <cmath>
+#include <limits.h>
+#include <algorithm>
+#include <utility>
+#include <queue>
 using namespace std;
+const int blockSize = 350;
+const int inf = INT_MAX/10;
+const int log2Max = int(log2(inf));
+vector<int> powers;
+vector<int> log2Arr;
+vector<int> visit;
+vector<int> bfsVisit;
+vector<int> weights;
+vector<int> redDistance;
 int main()
 {
-    map<int, int> m;
-    m[0] = 10;
-    m[10] = 0;
-    for(auto i = m.begin(); i != m.end(); i++)
-        cout << i->first << " " << i->second << endl;
+
     return 0;
 }

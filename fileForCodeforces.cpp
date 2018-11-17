@@ -31,10 +31,11 @@ int lca(int a1, int a2, int ** sparseTable)
     int l = first[a1];
     int r = first[a2];
     if(l > r)
-        swap(l, r);
-    int vertex1 = sparseTable[l][logArr[ r - l + 1]];
-    int vertex2 = sparseTable[r - powers[logArr[r - l + 1]] + 1][logArr[r - l + 1]];
-    return (weights[vertex1] > weights[vertex1] ? vertex1 : vertex1);
+        swap(l,r);
+    int vertexL = sparseTable[l][logArr[r - l  + 1]];
+    int vertexR = sparseTable[r - powers[logArr[r - l + 1]] + 1][logArr[r - l + 1]]; 
+    int lca = weights[vertexR] > weights[vertexL] ? vertexL : vertexR;
+    return lca;
 }
 int main()
 {
@@ -89,8 +90,11 @@ int main()
             else
             {
                 int vertex1 = sparseTable[i][j - 1];
-                int vertex2 = (i + powers[j - 1] < visit.size()) ? sparseTable[i + powers[j - 1]][j-1] : sparseTable[i][j - 1];
-                sparseTable[i][j] = weights[vertex1] > weights[vertex2] ? vertex2 : vertex1;
+                int vertex2 = (i + powers[j - 1] < visit.size()) ? sparseTable[i + powers[j - 1]][j - 1]: sparseTable[i][j - 1] ;
+                if(weights[vertex1] < weights[vertex2])
+                    sparseTable[i][j] = vertex1;
+                else 
+                    sparseTable[i][j] = vertex2;
             }
         }
     }
@@ -108,22 +112,17 @@ int main()
             int f = a[j];
             int t = a[(j + 1)%3];
             int s = a[(j + 2)%3];
-            cout << f << " " << t << " " << s << endl;
             int lcaft = lca(f, t, sparseTable);
             int lcafs = lca(f, s, sparseTable);
             int lcats = lca(t, s, sparseTable);
-            cout << lcaft << " " << lcafs << " " << lcats << endl;
-            if(lcaft == f && lcafs == f)
+            curMax += min(abs(weights[lcafs] - weights[f]), abs(weights[lcaft] - weights[f]));
+            if(lcafs == lcaft)
             {
-                //cout << "I am here " << endl;
-                //cout << f << t << s << endl;
-                curMax = abs(weights[f] - weights[lcats]);
+                curMax += abs(weights[lcaft] - weights[lcats]);
             }
-            else 
-                curMax = min(abs(weights[lcaft] - weights[f]), abs(weights[lcafs] - weights[f]));
             globalMax = max(globalMax, curMax);
         }
-        cout << globalMax << " globalMax ";
+        cout << globalMax + 1 << " ";
     }
     cout << endl;
 
