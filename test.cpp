@@ -28,7 +28,7 @@ void dfs(vector<int> * graph, int cur)
             used[graph[cur][i]] = true;
             weights[graph[cur][i]] = weights[cur] + 1;
             dfs(graph, graph[cur][i]);
-            visit.push_back(graph[cur][i]);
+            visit.push_back(cur);
         }
     }
 }
@@ -115,17 +115,20 @@ int main()
     fill(weights.begin(), weights.end(), 0);
     visit.reserve(2*n + 1);
     used[0] = true;
+    
     dfs(graph, 0);
     fill(used.begin(), used.end(), false);
+    used[0] = true;
     bfsVisit.reserve(n);
     bfs(graph, 0);
     first.resize(n);
     fill(first.begin(), first.end(), -1);
+    cout << endl;
     for(int i = 0; i < visit.size(); i++)
     {
-        if(first[visit[i]] == -1)
-            first[i] = i;
+        cout << visit[i] << " ";
     }
+    cout << endl;
     int ** sparseTable = new int *[visit.size()];
     for(int i = 0; i < visit.size(); i++)
         sparseTable[i] = new int [log2Arr[visit.size()] + 1];
