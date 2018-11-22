@@ -6,7 +6,7 @@
 #include <utility>
 #include <queue>
 using namespace std;
-const int blockSize = 350;
+const int blockSize = 330;
 const int inf = INT_MAX/10;
 const int log2Max = int(log2(inf));
 const int maxN = 200000;
@@ -57,10 +57,11 @@ int lca(int a1, int a2, int ** sparseTable)
     int l = first[a1];
     int r = first[a2];
     if(l > r)
-        swap(l, r);
-    int vertex1 = sparseTable[l][log2Arr[ r - l + 1]];
-    int vertex2 = sparseTable[r - powers[log2Arr[r - l + 1]] + 1][log2Arr[r - l + 1]];
-    return (weights[vertex1] > weights[vertex1] ? vertex1 : vertex1);
+        swap(l,r);
+    int vertexL = sparseTable[l][log2Arr[r - l  + 1]];
+    int vertexR = sparseTable[r - powers[log2Arr[r - l + 1]] + 1][log2Arr[r - l + 1]]; 
+    int lca = weights[vertexR] > weights[vertexL] ? vertexL : vertexR;
+    return lca;
 }
 void updateTree(vector<int> * graph, int root)
 {
@@ -70,7 +71,7 @@ void updateTree(vector<int> * graph, int root)
         for(int j = 0; j < graph[cur].size(); j++)
         {
             if(weights[graph[cur][j]] < weights[cur])
-                redDistance[graph[cur][j]] = min(redDistance[graph[cur][j]], redDistance[cur]);
+                redDistance[graph[cur][j]] = min(redDistance[graph[cur][j]], redDistance[cur] + 1);
         }
     }
     for(int i = 0; i < bfsVisit.size(); i++)
@@ -79,17 +80,17 @@ void updateTree(vector<int> * graph, int root)
         for(int j = 0; j < graph[cur].size(); j++)
         {
             if(weights[graph[cur][j]] > weights[cur])
-                redDistance[graph[cur][j]] = min(redDistance[graph[cur][j]], redDistance[cur]);
+                redDistance[graph[cur][j]] = min(redDistance[graph[cur][j]], redDistance[cur] + 1);
         }
     }
 }
 int main()
 {
     ios :: sync_with_stdio(false);
-    powers.resize(2*maxN);
-    log2Arr.resize(2*maxN);
+    powers.resize(3*maxN);
+    log2Arr.resize(3*maxN);
     powers[0] = 1;
-    for(int i = 1; i < 2*maxN; i++)
+    for(int i = 1; i < 3*maxN; i++)
     {
         if(i <= log2Max)
             powers[i] = powers[i - 1]*2;
@@ -123,12 +124,11 @@ int main()
     bfs(graph, 0);
     first.resize(n);
     fill(first.begin(), first.end(), -1);
-    cout << endl;
     for(int i = 0; i < visit.size(); i++)
     {
-        cout << visit[i] << " ";
+        if(first[visit[i]] == -1)
+            first[visit[i]] = i;
     }
-    cout << endl;
     int ** sparseTable = new int *[visit.size()];
     for(int i = 0; i < visit.size(); i++)
         sparseTable[i] = new int [log2Arr[visit.size()] + 1];
@@ -157,39 +157,34 @@ int main()
     redVertex.reserve(blockSize);
     for(int i = 0; i < m; i++)
     {
-        if(blockCounter < blockSize)
+        int type, vertex;
+        cin >> type >> vertex;
+        vertex--;
+        if(type == 1)
         {
-            int type, vertex;
-            cin >> type >> vertex;
-            type--;
-            vertex--;
-            if(type == 1)
-            {
-                redVertex.push_back(vertex);
-                redDistance[vertex] = 0;
-            }
-            else
-            {
-                int globalMin = inf;
-                for(int j = 0; j < redVertex.size(); j++)
-                {
-                    int curLca = lca(vertex, redVertex[i], sparseTable);
-                    int curMin = weights[vertex] + weights[redVertex[i]] - 2*weights[curLca];
-                    globalMin = min(curMin, globalMin);
-                }
-                globalMin = min(globalMin, redDistance[vertex]);
-                cout << globalMin << " ";
-                cout << " Hello world";
-            }
+            redVertex.push_back(vertex);
+            redDistance[vertex] = 0;
         }
         else
+        {
+            int globalMin = inf;
+            for(int j = 0; j < redVertex.size(); j++)
+            {
+                int curLca = lca(vertex, redVertex[j], sparseTable);
+                int curMin = weights[vertex] + weights[redVertex[j]] - 2*weights[curLca];
+                globalMin = min(curMin, globalMin);
+            }
+            globalMin = min(globalMin, redDistance[vertex]);
+            cout << globalMin << " ";
+        }
+        blockCounter++;
+        if(blockCounter == blockSize)
         {
             redVertex.clear();
             updateTree(graph, 0);
             blockCounter = 0;
         }
-        blockCounter++;
 
     }
     return 0;
-}
+} 
