@@ -23,6 +23,7 @@ int main()
     cout << " I am here" << endl;
     int n;
     vector<int> data;
+    cout << " hello world" << endl;
     //data.reserve(n);
     for(int i = 0; i < n; i++)
     {
@@ -30,6 +31,7 @@ int main()
         cin >> tmp;
         data.push_back(tmp);
     }
+    cout << " and here" << endl;
     vector<int> minTree;
     vector<int> maxTree;
     minTree.resize(4*data.size() + 1);
